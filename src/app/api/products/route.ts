@@ -20,7 +20,8 @@ const mockProducts: Product[] = [
       tdp: '105W'
     },
     brand: 'AMD',
-    model: 'Ryzen 9 5900X'
+    model: 'Ryzen 9 5900X',
+    discountPercentage: 0
   },
   {
     id: '2',
@@ -39,7 +40,8 @@ const mockProducts: Product[] = [
       displayPort: '3x DisplayPort 1.4a'
     },
     brand: 'NVIDIA',
-    model: 'RTX 4080'
+    model: 'RTX 4080',
+    discountPercentage: 0
   },
   {
     id: '3',
@@ -58,7 +60,8 @@ const mockProducts: Product[] = [
       endurance: '600 TBW'
     },
     brand: 'Samsung',
-    model: '970 EVO Plus'
+    model: '970 EVO Plus',
+    discountPercentage: 0
   },
   {
     id: '4',
@@ -77,7 +80,8 @@ const mockProducts: Product[] = [
       formFactor: 'ATX'
     },
     brand: 'ASUS',
-    model: 'ROG STRIX B550-F'
+    model: 'ROG STRIX B550-F',
+    discountPercentage: 0
   }
 ];
 

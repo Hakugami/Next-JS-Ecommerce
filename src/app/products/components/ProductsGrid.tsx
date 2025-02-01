@@ -84,6 +84,7 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
     if (!searchParams) return;
     const newParams = parseSearchParams(searchParams);
     if (
+      newParams.id !== filters.id ||
       newParams.category !== filters.category ||
       newParams.minPrice !== filters.minPrice ||
       newParams.maxPrice !== filters.maxPrice ||
@@ -99,7 +100,7 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
       });
       setPage(newParams.page);
     }
-  }, [searchParams]);
+  }, [searchParams, filters.id, filters.category, filters.minPrice, filters.maxPrice, filters.inStock, page]);
 
   // Update URL when filters or page changes
   useEffect(() => {
@@ -143,7 +144,7 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
     setAddingToCart(prev => ({ ...prev, [product.id]: true }));
     
     try {
-      await addItem(product);
+      addItem(product);
       setAddedToCart(prev => ({ ...prev, [product.id]: true }));
       
       toast({

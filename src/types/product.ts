@@ -9,17 +9,31 @@ export interface Product {
   specifications: Record<string, string>;
   brand: string;
   model: string;
+  // Add missing fields
+  discountPercentage: number;
+  rating?: number;
+  reviews?: Array<{
+    id: number;
+    user: {
+      name: string;
+      image: string;
+    };
+    rating: number;
+    date: string;
+    comment: string;
+  }>;
+  images?: string[];
 }
 
-export type ProductCategory = 
-  | 'CPU' 
-  | 'GPU' 
-  | 'Motherboard' 
-  | 'RAM' 
-  | 'Storage' 
-  | 'Power Supply' 
-  | 'Case' 
-  | 'Cooling';
+export type ProductCategory =
+  | "CPU"
+  | "GPU"
+  | "Motherboard"
+  | "RAM"
+  | "Storage"
+  | "Power Supply"
+  | "Case"
+  | "Cooling";
 
 export interface ProductFilters {
   category?: ProductCategory;
@@ -35,4 +49,4 @@ export interface PaginatedResponse<T> {
   page: number;
   pageSize: number;
   totalPages: number;
-} 
+}

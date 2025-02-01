@@ -20,7 +20,8 @@ const featuredProducts: Product[] = [
       tdp: '105W'
     },
     brand: 'AMD',
-    model: 'Ryzen 9 5900X'
+    model: 'Ryzen 9 5900X',
+    discountPercentage: 0
   },
   {
     id: '2',
@@ -39,7 +40,8 @@ const featuredProducts: Product[] = [
       displayPort: '3x DisplayPort 1.4a'
     },
     brand: 'NVIDIA',
-    model: 'RTX 4080'
+    model: 'RTX 4080',
+    discountPercentage: 0
   },
   {
     id: '3',
@@ -58,7 +60,8 @@ const featuredProducts: Product[] = [
       endurance: '600 TBW'
     },
     brand: 'Samsung',
-    model: '970 EVO Plus'
+    model: '970 EVO Plus',
+    discountPercentage: 0
   }
 ];
 

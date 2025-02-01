@@ -1,6 +1,5 @@
-"use client";
-
-import { useSession } from "next-auth/react";
+import { Metadata } from "next";
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,15 +15,62 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Package, Truck, CheckCircle } from "lucide-react";
+import React, { JSX } from "react";
+
+export const metadata: Metadata = {
+  title: "Order Details",
+};
+// Types
+interface OrderItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
+
+interface ShippingAddress {
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+interface TimelineEvent {
+  status: string;
+  date: string;
+  icon: React.ElementType;
+}
+
+interface OrderDetails {
+  id: string;
+  date: string;
+  status: keyof typeof statusColors;
+  total: number;
+  shipping: number;
+  tax: number;
+  items: OrderItem[];
+  shippingAddress: ShippingAddress;
+  timeline: TimelineEvent[];
+}
+
+const statusColors = {
+  processing: "bg-yellow-500",
+  shipped: "bg-blue-500",
+  delivered: "bg-green-500",
+  cancelled: "bg-red-500",
+} as const;
 
 // Mock data - replace with actual API call
-const orderDetails = {
+const orderDetails: OrderDetails = {
   id: "ORD001",
   date: "2024-01-30",
   status: "delivered",
   total: 1299.99,
   shipping: 15.99,
-  tax: 78.00,
+  tax: 78.0,
   items: [
     {
       id: 1,
@@ -75,28 +121,10 @@ const orderDetails = {
   ],
 };
 
-const statusColors = {
-  processing: "bg-yellow-500",
-  shipped: "bg-blue-500",
-  delivered: "bg-green-500",
-  cancelled: "bg-red-500",
-};
 
-export default function OrderDetailsPage({
-  params,
-}: {
-  params: { orderId: string };
-}) {
-  const { data: session, status } = useSession();
 
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
+export default async function OrderDetailsPage(): Promise<JSX.Element> {
+  const session = await getServerSession();
   if (!session) {
     redirect("/auth/login");
   }
@@ -113,7 +141,6 @@ export default function OrderDetailsPage({
       </div>
 
       <div className="grid gap-6">
-        {/* Order Summary */}
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
@@ -123,18 +150,13 @@ export default function OrderDetailsPage({
                   Placed on {new Date(orderDetails.date).toLocaleDateString()}
                 </p>
               </div>
-              <Badge
-                className={
-                  statusColors[orderDetails.status as keyof typeof statusColors]
-                }
-              >
+              <Badge className={statusColors[orderDetails.status]}>
                 {orderDetails.status.charAt(0).toUpperCase() +
                   orderDetails.status.slice(1)}
               </Badge>
             </div>
           </CardHeader>
           <CardContent>
-            {/* Order Timeline */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4">Order Timeline</h3>
               <div className="relative">
@@ -165,7 +187,6 @@ export default function OrderDetailsPage({
               </div>
             </div>
 
-            {/* Order Items */}
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
@@ -228,11 +249,12 @@ export default function OrderDetailsPage({
               </Table>
             </div>
 
-            {/* Shipping Address */}
             <div className="mt-8">
               <h3 className="text-lg font-semibold mb-4">Shipping Address</h3>
               <div className="text-sm">
-                <p className="font-medium">{orderDetails.shippingAddress.name}</p>
+                <p className="font-medium">
+                  {orderDetails.shippingAddress.name}
+                </p>
                 <p>{orderDetails.shippingAddress.street}</p>
                 <p>
                   {orderDetails.shippingAddress.city},{" "}

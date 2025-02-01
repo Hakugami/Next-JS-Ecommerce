@@ -19,9 +19,14 @@ import { formatPrice } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/providers/CartProvider";
+import { Product } from "@/types/product";
 
 // Mock data - replace with API call
-const product = {
+const product: Product = {
+  brand: "AMD",
+  category: "CPU",
+  image: "",
+  model: "RYZEN",
   id: "1",
   name: "AMD Ryzen 9 5950X",
   description: "16-core, 32-Thread Unlocked Desktop Processor",
@@ -51,13 +56,13 @@ const product = {
       comment: "Great performance but runs a bit hot under load.",
     },
   ],
-  specs: {
+  specifications: {
     "Processor Count": "16",
     "Thread Count": "32",
     "Base Clock": "3.4 GHz",
     "Max Boost Clock": "4.9 GHz",
     "Total L3 Cache": "64 MB",
-    "TDP": "105W",
+    TDP: "105W",
   },
   images: [
     "/images/products/cpu-main.jpg",
@@ -74,9 +79,14 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex items-center">
       {[...Array(fullStars)].map((_, i) => (
-        <Star key={`full-${i}`} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+        <Star
+          key={`full-${i}`}
+          className="w-4 h-4 fill-yellow-400 text-yellow-400"
+        />
       ))}
-      {hasHalfStar && <StarHalf className="w-4 h-4 fill-yellow-400 text-yellow-400" />}
+      {hasHalfStar && (
+        <StarHalf className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+      )}
       {[...Array(emptyStars)].map((_, i) => (
         <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
       ))}
@@ -85,22 +95,19 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export default function ProductPage({
-  params,
-}: {
-  params: { productId: string };
-}) {
+export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const { data: session } = useSession();
   const { toast } = useToast();
-  const { addItem } = useCart();
+  const { addItem, addItemWithQuantity } = useCart();
 
-  const discountedPrice = product.price * (1 - product.discountPercentage / 100);
+  const discountedPrice =
+    product.price * (1 - product.discountPercentage / 100);
 
   const handleAddToCart = async () => {
     try {
-      await addItem({ ...product, quantity });
+      addItemWithQuantity(product, quantity);
       toast({
         title: "Added to cart",
         description: `${quantity} x ${product.name} added to your cart`,
@@ -121,7 +128,7 @@ export default function ProductPage({
         <div className="space-y-4">
           <div className="relative aspect-square overflow-hidden rounded-lg border">
             <Image
-              src={product.images[selectedImage]}
+              src={(product.images ?? [])[selectedImage]}
               alt={product.name}
               fill
               className="object-cover"
@@ -129,10 +136,11 @@ export default function ProductPage({
             />
           </div>
           <div className="grid grid-cols-4 gap-4">
-            {product.images.map((image, index) => (
-              <button
+            {(product.images ?? []).map((image, index) => (
+              <Button
                 key={index}
                 onClick={() => setSelectedImage(index)}
+                title={`View image ${index + 1} of ${product.name}`}
                 className={`relative aspect-square overflow-hidden rounded-md border ${
                   selectedImage === index ? "ring-2 ring-primary" : ""
                 }`}
@@ -143,7 +151,7 @@ export default function ProductPage({
                   fill
                   className="object-cover"
                 />
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -153,7 +161,7 @@ export default function ProductPage({
           <div>
             <h1 className="text-3xl font-bold">{product.name}</h1>
             <div className="mt-2">
-              <StarRating rating={product.rating} />
+              <StarRating rating={product.rating ?? 0} />
             </div>
           </div>
 
@@ -191,7 +199,9 @@ export default function ProductPage({
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                onClick={() =>
+                  setQuantity(Math.min(product.stock, quantity + 1))
+                }
                 disabled={quantity >= product.stock}
               >
                 <Plus className="h-4 w-4" />
@@ -223,14 +233,16 @@ export default function ProductPage({
               <Card>
                 <CardContent className="pt-6">
                   <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {Object.entries(product.specs).map(([key, value]) => (
-                      <div key={key}>
-                        <dt className="text-sm font-medium text-muted-foreground">
-                          {key}
-                        </dt>
-                        <dd className="text-sm font-semibold">{value}</dd>
-                      </div>
-                    ))}
+                    {Object.entries(product.specifications).map(
+                      ([key, value]) => (
+                        <div key={key}>
+                          <dt className="text-sm font-medium text-muted-foreground">
+                            {key}
+                          </dt>
+                          <dd className="text-sm font-semibold">{value}</dd>
+                        </div>
+                      )
+                    )}
                   </dl>
                 </CardContent>
               </Card>
@@ -240,11 +252,11 @@ export default function ProductPage({
                 <CardHeader>
                   <CardTitle>Customer Reviews</CardTitle>
                   <CardDescription>
-                    {product.reviews.length} reviews for this product
+                    {(product.reviews ?? []).length} reviews for this product
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {product.reviews.map((review) => (
+                  {(product.reviews ?? []).map((review) => (
                     <div key={review.id} className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <Avatar>

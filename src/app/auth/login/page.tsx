@@ -25,7 +25,7 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            Don&#39;t have an account?{" "}
             <Button variant="link" className="px-0" asChild>
               <Link href="/auth/register">Sign up</Link>
             </Button>
