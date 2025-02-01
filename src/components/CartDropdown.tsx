@@ -1,39 +1,48 @@
-'use client';
+"use client";
 
-import { Button } from './ui/button';
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { ShoppingCart, Plus, Minus, X } from 'lucide-react';
-import { Badge } from './ui/badge';
-import { useCart } from '@/providers/CartProvider';
-import { ScrollArea } from './ui/scroll-area';
-import Image from 'next/image';
-import { formatPrice } from '@/lib/utils';
-import Link from 'next/link';
+} from "./ui/dropdown-menu";
+import { ShoppingCart, Plus, Minus, X } from "lucide-react";
+import { Badge } from "./ui/badge";
+import { useCart } from "@/providers/CartProvider";
+import { ScrollArea } from "./ui/scroll-area";
+import Image from "next/image";
+import { formatPrice } from "@/lib/utils";
+import Link from "next/link";
 
 export function CartDropdown() {
-  const { items, getItemCount, getTotal, updateQuantity, removeItem } = useCart();
+  const { items, getItemCount, getTotal, updateQuantity, removeItem } =
+    useCart();
   const itemCount = getItemCount();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <ShoppingCart className="h-5 w-5" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-9 w-9 sm:h-10 sm:w-10 inline-flex items-center justify-center"
+        >
+          <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
           {itemCount > 0 && (
-            <Badge 
-              variant="destructive" 
-              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0"
+            <Badge
+              variant="destructive"
+              className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-[10px] sm:text-xs"
             >
               {itemCount}
             </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent
+        align="end"
+        side="bottom"
+        className="w-[90vw] max-w-80"
+      >
         <div className="p-4">
           <h3 className="font-semibold mb-4">Shopping Cart</h3>
           {items.length === 0 ? (
@@ -67,7 +76,9 @@ export function CartDropdown() {
                             variant="outline"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity - 1)
+                            }
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
@@ -78,7 +89,9 @@ export function CartDropdown() {
                             variant="outline"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity + 1)
+                            }
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -99,7 +112,9 @@ export function CartDropdown() {
               <div className="border-t mt-4 pt-4">
                 <div className="flex justify-between mb-4">
                   <span className="font-semibold">Total</span>
-                  <span className="font-semibold">{formatPrice(getTotal())}</span>
+                  <span className="font-semibold">
+                    {formatPrice(getTotal())}
+                  </span>
                 </div>
                 <Button asChild className="w-full">
                   <Link href="/checkout">Proceed to Checkout</Link>
@@ -111,4 +126,4 @@ export function CartDropdown() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-} 
+}

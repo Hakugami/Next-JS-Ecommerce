@@ -20,6 +20,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/providers/CartProvider";
 import { Product } from "@/types/product";
+import { DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 // Mock data - replace with API call
 const product: Product = {
@@ -126,15 +128,20 @@ export default function ProductPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Product Images */}
         <div className="space-y-4">
-          <div className="relative aspect-square overflow-hidden rounded-lg border">
-            <Image
-              src={(product.images ?? [])[selectedImage]}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
+          <VisuallyHidden>
+            <DialogTitle>{product.name} Image Preview</DialogTitle>
+          </VisuallyHidden>
+          <DialogContent className="sm:max-w-[90vw]">
+            <div className="relative aspect-square overflow-hidden rounded-lg border">
+              <Image
+                src={(product.images ?? [])[selectedImage]}
+                alt={product.name}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          </DialogContent>
           <div className="grid grid-cols-4 gap-4">
             {(product.images ?? []).map((image, index) => (
               <Button

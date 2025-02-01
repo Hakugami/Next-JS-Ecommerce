@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
 import { StarRating } from "@/components/StarRating";
 import { DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 // Mock data - replace with API call
 const mockProducts = [
@@ -110,7 +111,9 @@ export function SearchBar() {
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <DialogTitle className="sr-only">Search products</DialogTitle>
+        <VisuallyHidden>
+          <DialogTitle>Product Search</DialogTitle>
+        </VisuallyHidden>
         <CommandInput
           placeholder="Search products..."
           value={query}

@@ -1,20 +1,32 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import {useEffect, useState} from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import {useProducts} from '@/hooks/useProducts';
-import {Product, ProductCategory} from '@/types/product';
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
-import {Input} from "@/components/ui/input";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import {usePathname, useRouter} from 'next/navigation';
-import {ProductsLoading} from './ProductsLoading';
-import { useCart } from '@/providers/CartProvider';
-import { ShoppingCart, Check } from 'lucide-react';
-import { formatPrice } from '@/lib/utils';
+import * as React from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useProducts } from "@/hooks/useProducts";
+import { Product, ProductCategory } from "@/types/product";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { usePathname, useRouter } from "next/navigation";
+import { ProductsLoading } from "./ProductsLoading";
+import { useCart } from "@/providers/CartProvider";
+import { ShoppingCart, Check } from "lucide-react";
+import { formatPrice } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,21 +59,28 @@ function parseSearchParams(params: SearchParams): ParsedParams {
   const inStock = params.inStock;
 
   return {
-    id: typeof id === 'string' ? id : undefined,
-    category: typeof category === 'string' ? category : undefined,
-    page: typeof page === 'string' ? parseInt(page, 10) : 1,
-    minPrice: typeof minPrice === 'string' ? parseFloat(minPrice) : undefined,
-    maxPrice: typeof maxPrice === 'string' ? parseFloat(maxPrice) : undefined,
-    inStock: typeof inStock === 'string' ? inStock === 'true' : undefined,
+    id: typeof id === "string" ? id : undefined,
+    category: typeof category === "string" ? category : undefined,
+    page: typeof page === "string" ? parseInt(page, 10) : 1,
+    minPrice: typeof minPrice === "string" ? parseFloat(minPrice) : undefined,
+    maxPrice: typeof maxPrice === "string" ? parseFloat(maxPrice) : undefined,
+    inStock: typeof inStock === "string" ? inStock === "true" : undefined,
   };
 }
 
-export function ProductsGrid({ searchParams, products: initialProducts, showFilters = true, columns = 3 }: ProductsGridProps) {
+export function ProductsGrid({
+  searchParams,
+  products: initialProducts,
+  showFilters = true,
+  columns = 3,
+}: ProductsGridProps) {
   const router = useRouter();
   const pathname = usePathname();
 
   // Only parse search params and set up filters if searchParams is provided
-  const parsedParams = searchParams ? parseSearchParams(searchParams) : { page: 1 };
+  const parsedParams = searchParams
+    ? parseSearchParams(searchParams)
+    : { page: 1 };
 
   const [filters, setFilters] = useState<{
     id: string | undefined;
@@ -100,35 +119,85 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
       });
       setPage(newParams.page);
     }
-  }, [searchParams, filters.id, filters.category, filters.minPrice, filters.maxPrice, filters.inStock, page]);
+  }, [
+    searchParams,
+    filters.id,
+    filters.category,
+    filters.minPrice,
+    filters.maxPrice,
+    filters.inStock,
+    page,
+  ]);
 
   // Update URL when filters or page changes
   useEffect(() => {
     if (!searchParams) return;
-    const currentParams = parseSearchParams(searchParams);
-    if (
-      currentParams.category === filters.category &&
-      currentParams.minPrice === filters.minPrice &&
-      currentParams.maxPrice === filters.maxPrice &&
-      currentParams.inStock === filters.inStock &&
-      currentParams.page === page
-    ) {
-      return; // Skip if no changes
-    }
 
     const params = new URLSearchParams();
+    let hasChanges = false;
+    const currentParams = parseSearchParams(searchParams);
 
-    if (filters.category) params.set('category', filters.category);
-    if (filters.minPrice) params.set('minPrice', filters.minPrice.toString());
-    if (filters.maxPrice) params.set('maxPrice', filters.maxPrice.toString());
-    if (filters.inStock !== undefined) params.set('inStock', filters.inStock.toString());
-    if (page > 1) params.set('page', page.toString());
+    // Category filter
+    if (filters.category !== currentParams.category) {
+      if (filters.category) {
+        params.set("category", filters.category);
+        hasChanges = true;
+      } else if (currentParams.category) {
+        hasChanges = true; // Category was removed
+      }
+    }
 
-    const queryString = params.toString();
-    router.push(`${pathname}${queryString ? `?${queryString}` : ''}`);
-  }, [filters, page, pathname, router, searchParams]);
+    // Min Price filter
+    if (filters.minPrice !== currentParams.minPrice) {
+      if (filters.minPrice) {
+        params.set("minPrice", filters.minPrice.toString());
+        hasChanges = true;
+      } else if (currentParams.minPrice) {
+        hasChanges = true; // Min price was removed
+      }
+    }
 
-  const { products: fetchedProducts, isLoading, error } = useProducts(
+    // Max Price filter
+    if (filters.maxPrice !== currentParams.maxPrice) {
+      if (filters.maxPrice) {
+        params.set("maxPrice", filters.maxPrice.toString());
+        hasChanges = true;
+      } else if (currentParams.maxPrice) {
+        hasChanges = true; // Max price was removed
+      }
+    }
+
+    // In Stock filter
+    if (filters.inStock !== currentParams.inStock) {
+      if (filters.inStock !== undefined) {
+        params.set("inStock", filters.inStock.toString());
+        hasChanges = true;
+      } else if (currentParams.inStock !== undefined) {
+        hasChanges = true; // In stock filter was removed
+      }
+    }
+
+    // Page number
+    if (page !== currentParams.page) {
+      if (page > 1) {
+        params.set("page", page.toString());
+        hasChanges = true;
+      } else if (currentParams.page) {
+        hasChanges = true; // Page was reset to 1
+      }
+    }
+
+    if (hasChanges) {
+      const queryString = params.toString();
+      router.push(`${pathname}${queryString ? `?${queryString}` : ""}`);
+    }
+  }, [filters, page, pathname, router]);
+
+  const {
+    products: fetchedProducts,
+    isLoading,
+    error,
+  } = useProducts(
     searchParams ? page : 1,
     9,
     searchParams ? filters : undefined
@@ -137,24 +206,28 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
   const { addItem } = useCart();
   const { toast } = useToast();
 
-  const [addingToCart, setAddingToCart] = useState<{ [key: string]: boolean }>({});
-  const [addedToCart, setAddedToCart] = useState<{ [key: string]: boolean }>({});
+  const [addingToCart, setAddingToCart] = useState<{ [key: string]: boolean }>(
+    {}
+  );
+  const [addedToCart, setAddedToCart] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   const handleAddToCart = async (product: Product) => {
-    setAddingToCart(prev => ({ ...prev, [product.id]: true }));
-    
+    setAddingToCart((prev) => ({ ...prev, [product.id]: true }));
+
     try {
       addItem(product);
-      setAddedToCart(prev => ({ ...prev, [product.id]: true }));
-      
+      setAddedToCart((prev) => ({ ...prev, [product.id]: true }));
+
       toast({
         title: "Added to cart",
         description: `${product.name} has been added to your cart.`,
       });
-      
+
       // Reset the success state after 2 seconds
       setTimeout(() => {
-        setAddedToCart(prev => ({ ...prev, [product.id]: false }));
+        setAddedToCart((prev) => ({ ...prev, [product.id]: false }));
       }, 2000);
     } catch (error) {
       toast({
@@ -163,7 +236,7 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
         variant: "destructive",
       });
     } finally {
-      setAddingToCart(prev => ({ ...prev, [product.id]: false }));
+      setAddingToCart((prev) => ({ ...prev, [product.id]: false }));
     }
   };
 
@@ -195,11 +268,14 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
               <div className="flex flex-col gap-2">
                 <label className="text-sm text-gray-600">Category</label>
                 <Select
-                  value={filters.category || 'all'}
+                  value={filters.category || "all"}
                   onValueChange={(value) => {
                     setFilters({
                       ...filters,
-                      category: value === 'all' ? undefined : value as ProductCategory,
+                      category:
+                        value === "all"
+                          ? undefined
+                          : (value as ProductCategory),
                     });
                     setPage(1); // Reset page when filter changes
                   }}
@@ -209,10 +285,20 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {['CPU', 'GPU', 'Motherboard', 'RAM', 'Storage', 'Power Supply', 'Case', 'Cooling']
-                      .map((category) => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                      ))}
+                    {[
+                      "CPU",
+                      "GPU",
+                      "Motherboard",
+                      "RAM",
+                      "Storage",
+                      "Power Supply",
+                      "Case",
+                      "Cooling",
+                    ].map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -223,11 +309,13 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
                 <Input
                   type="number"
                   placeholder="Min Price"
-                  value={filters.minPrice || ''}
+                  value={filters.minPrice || ""}
                   onChange={(e) => {
                     setFilters({
                       ...filters,
-                      minPrice: e.target.value ? Number(e.target.value) : undefined,
+                      minPrice: e.target.value
+                        ? Number(e.target.value)
+                        : undefined,
                     });
                     setPage(1); // Reset page when filter changes
                   }}
@@ -238,11 +326,13 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
                 <Input
                   type="number"
                   placeholder="Max Price"
-                  value={filters.maxPrice || ''}
+                  value={filters.maxPrice || ""}
                   onChange={(e) => {
                     setFilters({
                       ...filters,
-                      maxPrice: e.target.value ? Number(e.target.value) : undefined,
+                      maxPrice: e.target.value
+                        ? Number(e.target.value)
+                        : undefined,
                     });
                     setPage(1); // Reset page when filter changes
                   }}
@@ -253,11 +343,15 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
               <div className="flex flex-col gap-2">
                 <label className="text-sm text-gray-600">Stock Status</label>
                 <Select
-                  value={filters.inStock !== undefined ? filters.inStock.toString() : 'all'}
+                  value={
+                    filters.inStock !== undefined
+                      ? filters.inStock.toString()
+                      : "all"
+                  }
                   onValueChange={(value) => {
                     setFilters({
                       ...filters,
-                      inStock: value === 'all' ? undefined : value === 'true',
+                      inStock: value === "all" ? undefined : value === "true",
                     });
                     setPage(1); // Reset page when filter changes
                   }}
@@ -278,7 +372,9 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
       )}
 
       {/* Products Grid */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${columns} gap-6`}>
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${columns} gap-6`}
+      >
         {displayProducts?.map((product: Product) => (
           <Card key={product.id} className="group relative">
             <div className="relative h-48 bg-gray-200 rounded-t-lg overflow-hidden">
@@ -295,7 +391,9 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
                   disabled={addingToCart[product.id]}
                   className={cn(
                     "bg-white text-black transition-all duration-200",
-                    addedToCart[product.id] ? "bg-green-500 text-white hover:bg-green-600" : "hover:bg-white/90",
+                    addedToCart[product.id]
+                      ? "bg-green-500 text-white hover:bg-green-600"
+                      : "hover:bg-white/90",
                     addingToCart[product.id] && "opacity-70"
                   )}
                 >
@@ -320,9 +418,15 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
               <p className="text-sm text-gray-500">{product.category}</p>
             </CardHeader>
             <CardContent>
-              <p className="text-lg font-bold text-blue-600">{formatPrice(product.price)}</p>
-              <p className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+              <p className="text-lg font-bold text-blue-600">
+                {formatPrice(product.price)}
+              </p>
+              <p
+                className={`text-sm ${
+                  product.stock > 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {product.stock > 0 ? "In Stock" : "Out of Stock"}
               </p>
             </CardContent>
             <CardFooter>
@@ -358,4 +462,4 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
       )}
     </>
   );
-} 
+}
