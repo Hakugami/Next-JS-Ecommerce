@@ -6,6 +6,8 @@ import { CartProvider } from "@/providers/CartProvider";
 import { Navbar } from "@/components/Navbar";
 import { useState } from "react";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "@/components/ui/toaster";
+import { FontSizeProvider } from "@/providers/FontSizeProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -30,17 +32,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
           disableTransitionOnChange
           enableColorScheme={true}
         >
-          <CartProvider>
-            <Navbar />
-            <main className="container mx-auto px-4 py-8 flex-grow">
-              {children}
-            </main>
-            <footer className="bg-gray-800 text-white mt-auto">
-              <div className="container mx-auto px-4 py-4 text-center">
-                © 2024 PC Parts Store
-              </div>
-            </footer>
-          </CartProvider>
+          <FontSizeProvider>
+            <CartProvider>
+              <Navbar />
+              <main className="container mx-auto px-4 py-8 flex-grow">
+                {children}
+              </main>
+              <footer className="bg-gray-800 text-white mt-auto">
+                <div className="container mx-auto px-4 py-4 text-center">
+                  &copy; 2024 PC Parts Store
+                </div>
+              </footer>
+              <Toaster />
+            </CartProvider>
+          </FontSizeProvider>
         </NextThemesProvider>
       </QueryClientProvider>
     </SessionProvider>

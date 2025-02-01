@@ -13,8 +13,10 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/
 import {usePathname, useRouter} from 'next/navigation';
 import {ProductsLoading} from './ProductsLoading';
 import { useCart } from '@/providers/CartProvider';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Check } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface SearchParams {
   [key: string]: string | string[] | undefined;
@@ -132,6 +134,37 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
   );
 
   const { addItem } = useCart();
+  const { toast } = useToast();
+
+  const [addingToCart, setAddingToCart] = useState<{ [key: string]: boolean }>({});
+  const [addedToCart, setAddedToCart] = useState<{ [key: string]: boolean }>({});
+
+  const handleAddToCart = async (product: Product) => {
+    setAddingToCart(prev => ({ ...prev, [product.id]: true }));
+    
+    try {
+      await addItem(product);
+      setAddedToCart(prev => ({ ...prev, [product.id]: true }));
+      
+      toast({
+        title: "Added to cart",
+        description: `${product.name} has been added to your cart.`,
+      });
+      
+      // Reset the success state after 2 seconds
+      setTimeout(() => {
+        setAddedToCart(prev => ({ ...prev, [product.id]: false }));
+      }, 2000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingToCart(prev => ({ ...prev, [product.id]: false }));
+    }
+  };
 
   const displayProducts = initialProducts || fetchedProducts?.data;
 
@@ -253,14 +286,31 @@ export function ProductsGrid({ searchParams, products: initialProducts, showFilt
                 alt={product.name}
                 fill
                 className="object-cover transition-transform group-hover:scale-110"
+                sizes={`(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw`}
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <Button
-                  onClick={() => addItem(product)}
-                  className="bg-white text-black hover:bg-white/90"
+                  onClick={() => handleAddToCart(product)}
+                  disabled={addingToCart[product.id]}
+                  className={cn(
+                    "bg-white text-black transition-all duration-200",
+                    addedToCart[product.id] ? "bg-green-500 text-white hover:bg-green-600" : "hover:bg-white/90",
+                    addingToCart[product.id] && "opacity-70"
+                  )}
                 >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  Add to Cart
+                  {addingToCart[product.id] ? (
+                    <span className="animate-pulse">Adding...</span>
+                  ) : addedToCart[product.id] ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Added!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Add to Cart
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

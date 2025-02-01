@@ -12,6 +12,7 @@ import { useCart } from '@/providers/CartProvider';
 import { ScrollArea } from './ui/scroll-area';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/utils';
+import Link from 'next/link';
 
 export function CartDropdown() {
   const { items, getItemCount, getTotal, updateQuantity, removeItem } = useCart();
@@ -51,6 +52,7 @@ export function CartDropdown() {
                           alt={item.product.name}
                           fill
                           className="object-cover"
+                          sizes={`(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw`}
                         />
                       </div>
                       <div className="flex-1 space-y-1">
@@ -99,7 +101,9 @@ export function CartDropdown() {
                   <span className="font-semibold">Total</span>
                   <span className="font-semibold">{formatPrice(getTotal())}</span>
                 </div>
-                <Button className="w-full">Checkout</Button>
+                <Button asChild className="w-full">
+                  <Link href="/checkout">Proceed to Checkout</Link>
+                </Button>
               </div>
             </>
           )}
